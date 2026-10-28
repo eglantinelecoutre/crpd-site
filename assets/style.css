@@ -69,6 +69,7 @@ a.chip:hover{text-decoration:underline}
 .meta{display:flex;flex-wrap:wrap;gap:6px 14px;font-size:.88rem;color:var(--muted);align-items:center}
 .notice{border-radius:8px;padding:10px 14px;font-size:.88rem;background:var(--warn-soft);color:var(--warn);border:1px solid var(--warn)}
 .notice.err{background:var(--err-soft);color:var(--err);border-color:var(--err)}
+.notice.info{background:var(--accent-soft);color:var(--accent);border-color:var(--accent)}
 .pager{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;border-top:1px solid var(--line);padding-top:16px;font-size:.92rem}
 
 /* Contenu Markdown */

@@ -463,6 +463,44 @@
     e.preventDefault();
     download(el.getAttribute("data-download"), el.tagName === "BUTTON" ? el : null);
   });
+  /* ---------- Rafraîchissement automatique au retour sur l'onglet ---------- */
+
+  var AUTO_REFRESH_MS = 2 * 60 * 1000;
+  var autoRefreshing = false;
+
+  function signature() {
+    return state.docs.map(function (d) { return d.path + ":" + d.sha; }).sort().join("|") +
+      "#" + Object.keys(state.paths).sort().join("|");
+  }
+
+  function notify(msg) {
+    var n = document.createElement("div");
+    n.className = "notice info"; n.setAttribute("role", "status"); n.textContent = msg;
+    app.insertBefore(n, app.firstChild);
+    setTimeout(function () { n.remove(); }, 5000);
+  }
+
+  function autoRefresh() {
+    if (document.visibilityState !== "visible" || autoRefreshing) return;
+    if (!state.token || !state.loadedAt || Date.now() - state.loadedAt.getTime() < AUTO_REFRESH_MS) return;
+    autoRefreshing = true;
+    var before = signature();
+    loadIndex(true).then(function () {
+      if (signature() === before) return;
+      var y = window.scrollY;
+      route();
+      window.scrollTo(0, y);
+      notify("Documents mis à jour.");
+    }).catch(function (e) {
+      if (e && e.status === 401) logout("Ta clé d'accès a expiré ou a été révoquée. Demande-en une nouvelle.");
+      /* autre erreur : on garde l'affichage actuel, nouvel essai au prochain retour sur l'onglet */
+    }).then(function () { autoRefreshing = false; });
+  }
+
+  document.addEventListener("visibilitychange", autoRefresh);
+  window.addEventListener("focus", autoRefresh);
+  window.addEventListener("pageshow", function (e) { if (e.persisted) autoRefresh(); });
+
   document.getElementById("btnRefresh").addEventListener("click", function () { start(true); });
   document.getElementById("btnLogout").addEventListener("click", function () { logout("Tu es déconnectée. La clé a été effacée de cet appareil."); });
   window.addEventListener("hashchange", function () { if (state.token && state.loadedAt) route(); });

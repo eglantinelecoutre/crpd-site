@@ -46,6 +46,7 @@ En cas de perte d'un appareil : révoquer le jeton sur GitHub, en créer un nouv
 ## Fonctionnement
 
 - Au chargement : un appel à l'API des arbres Git (`git/trees/main?recursive=1`), puis lecture de chaque `.md` hors `originaux/` et hors racine (en parallèle, 6 à la fois). Le contenu est mis en cache dans `sessionStorage` par SHA de blob : un fichier inchangé n'est pas rechargé pendant la session.
+- **Actualisation** : la liste des fichiers est rechargée à l'ouverture, au bouton « Actualiser » et automatiquement quand on revient sur l'onglet (événements `visibilitychange`, `focus`, `pageshow`) si le dernier chargement date de plus de 2 minutes. Le rafraîchissement automatique est silencieux : un appel à l'API des arbres, puis seuls les fichiers dont le SHA a changé sont téléchargés ; la page n'est redessinée (position de lecture conservée, message « Documents mis à jour ») que si quelque chose a changé. En cas d'erreur réseau, l'affichage reste tel quel ; en cas de jeton expiré, retour à l'écran de connexion.
 - Le frontmatter (YAML, schéma *core*, les dates restent des chaînes) construit les index : entraînements regroupés par `entrainement`, fiches, méthode, textes officiels, thèmes.
 - Les originaux sont téléchargés via l'API des contenus avec `Accept: application/vnd.github.raw` (jusqu'à 100 Mo), puis enregistrés depuis le navigateur.
 - Les images référencées en relatif dans un `.md` sont chargées de la même façon et affichées en `blob:`. Les images externes ne sont pas affichées.
